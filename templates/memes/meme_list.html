@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ feed_title }} - MemeArena{% endblock %}
+
+{% block content %}
+<div class="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">{{ feed_title }}</h1>
+    
+    <div class="flex items-center space-x-2 bg-white p-1 rounded-lg shadow-sm border border-gray-100 flex-wrap gap-y-2">
+        <a href="{% url 'latest_memes' %}" class="px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 {% if request.resolver_match.url_name == 'latest_memes' %}bg-indigo-600 text-white shadow-md{% else %}bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50{% endif %}">Latest</a>
+        <a href="{% url 'trending_memes' %}" class="px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 {% if request.resolver_match.url_name == 'trending_memes' %}bg-indigo-600 text-white shadow-md{% else %}bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50{% endif %}">Trending</a>
+        <div class="w-px h-6 bg-gray-200 mx-1 hidden sm:block"></div>
+        <a href="{% url 'top_today' %}" class="px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 {% if request.resolver_match.url_name == 'top_today' %}bg-purple-600 text-white shadow-md{% else %}bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50{% endif %}">Top Today</a>
+        <a href="{% url 'top_week' %}" class="px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 {% if request.resolver_match.url_name == 'top_week' %}bg-purple-600 text-white shadow-md{% else %}bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50{% endif %}">Top Week</a>
+        <a href="{% url 'top_all' %}" class="px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 {% if request.resolver_match.url_name == 'top_all' %}bg-purple-600 text-white shadow-md{% else %}bg-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50{% endif %}">All Time</a>
+        <div class="w-px h-6 bg-gray-200 mx-1 hidden md:block"></div>
+        <a href="{% url 'meme_upload' %}" class="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium text-sm rounded-md shadow-md hover:from-green-600 hover:to-green-700 transition flex items-center">
+            Upload
+        </a>
+    </div>
+</div>
+
+{% if featured_meme %}
+<div class="mb-12 bg-gradient-to-r from-indigo-900 via-purple-900 to-indigo-900 rounded-2xl shadow-2xl overflow-hidden border border-indigo-500/30">
+    <div class="flex flex-col md:flex-row">
+        <!-- Text Content -->
+        <div class="p-8 md:p-12 md:w-1/2 flex flex-col justify-center relative">
+            <div class="absolute top-0 left-0 w-full h-full bg-white opacity-5 pointer-events-none"></div>
+            <div class="inline-flex items-center space-x-2 bg-yellow-500/20 text-yellow-300 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest w-max mb-6 border border-yellow-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.381z" clip-rule="evenodd" />
+                </svg>
+                <span>Meme of the Day</span>
+            </div>
+            
+            <h2 class="text-4xl md:text-5xl font-black text-white mb-4 leading-tight">
+                {{ featured_meme.title }}
+            </h2>
+            
+            <p class="text-indigo-200 text-lg mb-8 max-w-lg">
+                Selected as the absolute best meme of the day. Join the hype by voting!
+            </p>
+            
+            <div class="mt-auto flex items-center justify-between z-10">
+                <div class="flex items-center space-x-3">
+                    <div class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold border-2 border-indigo-400">
+                        {{ featured_meme.author.username|make_list|first|upper }}
+                    </div>
+                    <span class="text-indigo-100 font-medium">By <strong class="text-white">{{ featured_meme.author.username }}</strong></span>
+                </div>
+                
+                <a href="{% url 'meme_detail' featured_meme.slug %}" class="bg-white text-indigo-900 px-6 py-2.5 rounded-lg font-bold text-sm shadow-xl shadow-indigo-900/50 hover:bg-indigo-50 transition transform hover:-translate-y-0.5">
+                    View & Vote &rarr;
+                </a>
+            </div>
+        </div>
+        
+        <!-- Image Content -->
+        <div class="md:w-1/2 bg-black/40 flex items-center justify-center p-6 md:p-12 relative overflow-hidden">
+            <div class="absolute inset-0 bg-indigo-900 mix-blend-overlay opacity-30 pointer-events-none"></div>
+            <img src="{{ featured_meme.image.url }}" alt="{{ featured_meme.title }}" class="max-h-96 object-contain rounded-lg shadow-2xl relative z-10 transform transition hover:scale-105 duration-500 block mx-auto pointer-events-none">
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8">
+    {% for meme in memes %}
+        {% include 'memes/components/meme_card.html' with meme=meme %}
+    {% empty %}
+        <div class="col-span-full flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-gray-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="text-xl font-medium text-gray-500">No memes found here yet.</p>
+            <a href="{% url 'meme_upload' %}" class="mt-4 text-indigo-600 hover:text-indigo-800 font-medium">Be the first to upload one &rarr;</a>
+        </div>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+<div class="mt-12 flex justify-center pb-8">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            &larr; Previous
+        </a>
+        {% else %}
+        <span class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-200 bg-gray-50 text-sm font-medium text-gray-400 cursor-not-allowed">
+            &larr; Previous
+        </span>
+        {% endif %}
+        
+        <span class="relative inline-flex items-center px-6 py-2 border-t border-b border-gray-300 bg-indigo-50 text-sm font-bold text-indigo-700">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+            Next &rarr;
+        </a>
+        {% else %}
+        <span class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-200 bg-gray-50 text-sm font-medium text-gray-400 cursor-not-allowed">
+            Next &rarr;
+        </span>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+{% endblock %}

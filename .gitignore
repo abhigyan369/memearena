@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+db.sqlite3
+.env
+venv/
+media/
+staticfiles/
+*.log
+
+# macOS
+.DS_Store
+
+# Docker
+*.pid

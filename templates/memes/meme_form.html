@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Meme - MemeArena{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-10 px-6 sm:px-10 bg-white rounded-2xl shadow-xl border border-gray-100">
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 mb-4 shadow-inner">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+        </div>
+        <h2 class="text-3xl font-black text-gray-900">Upload Your Template</h2>
+        <p class="mt-2 text-gray-500">Unleash your creativity upon the world.</p>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                <h3 class="text-sm font-bold text-red-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    Please fix the following errors
+                </h3>
+                <ul class="mt-3 text-sm text-red-700 list-disc list-inside bg-white/50 rounded-lg p-3">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li><span class="font-bold">{{ field.label }}</span>: {{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="space-y-5">
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-bold tracking-wide text-gray-700 uppercase mb-1">{{ field.label }}</label>
+                    <div class="mt-1">
+                    {{ field }}
+                    </div>
+                    {% if field.help_text %}
+                        <p class="mt-2 text-xs text-gray-400 font-medium">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="pt-8 mt-8 border-t border-gray-100 flex justify-end items-center gap-4">
+            <a href="{% url 'latest_memes' %}" class="py-2.5 px-5 bg-white border-2 border-gray-200 rounded-lg shadow-sm text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-900 focus:outline-none transition-all">Cancel</a>
+            <button type="submit" class="py-2.5 px-8 border border-transparent shadow-lg shadow-indigo-200 text-sm font-bold rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all flex items-center">
+                Submit Meme &rarr;
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

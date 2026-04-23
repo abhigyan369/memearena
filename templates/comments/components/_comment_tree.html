@@ -1,0 +1,46 @@
+<div class="mb-5 last:mb-0">
+    <div class="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-sm flex space-x-3 transition hover:shadow-md dark:shadow-none dark:hover:bg-gray-700/80 group">
+        <div class="flex-shrink-0 mt-1">
+            <div class="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-md border-2 border-white dark:border-gray-800">
+                {{ comment.author.username|make_list|first|upper }}
+            </div>
+        </div>
+        <div class="flex-grow">
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'user_profile' comment.author.username %}" class="font-bold text-gray-900 dark:text-gray-100 text-[15px] hover:underline hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                    {{ comment.author.username }}
+                </a>
+                <span class="text-xs text-gray-400 dark:text-gray-500 font-medium">• {{ comment.created_at|timesince }} ago</span>
+            </div>
+            <div class="mt-1.5 text-gray-700 dark:text-gray-300 text-[15px] leading-relaxed">
+                {{ comment.body|linebreaks }}
+            </div>
+            
+            {% if request.user.is_authenticated %}
+            <button x-data @click="$dispatch('reply-show-{{ comment.id }}')" class="mt-3 text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center transition bg-gray-50 dark:bg-gray-900 px-3 py-1.5 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 opacity-80 group-hover:opacity-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                Reply
+            </button>
+            <div x-data="{ open: false }" @reply-show-{{ comment.id }}.window="open = !open" x-show="open" x-transition class="mt-4 border-l-2 border-indigo-400 dark:border-indigo-600 pl-4 py-1" style="display: none;">
+                <form action="{% url 'add_reply' meme.id comment.id %}" method="POST" class="mb-1">
+                    {% csrf_token %}
+                    <textarea name="body" rows="2" class="w-full shadow-inner text-sm p-3 text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 transition-all resize-none" placeholder="Write a reply..."></textarea>
+                    <div class="mt-3 flex justify-end gap-2">
+                        <button type="button" @click="open = false" class="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition shadow-sm">Cancel</button>
+                        <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow transition">Post Reply</button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if comment.replies.all %}
+    <div class="ml-4 sm:ml-12 border-l-2 border-gray-100 dark:border-gray-700 pl-4 sm:pl-6 pt-5 mt-2 relative">
+        <div class="absolute -top-2 -left-[1px] h-4 w-px bg-gray-100 dark:bg-gray-700"></div>
+        {% for reply in comment.replies.all|dictsortreversed:"created_at" %}
+            {% include 'comments/components/_comment_tree.html' with comment=reply meme=meme %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
